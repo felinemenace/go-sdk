@@ -10,7 +10,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-    - uses: docker://golang:1
-    - uses: actions/checkout@v1
-    - name: go test
-      run: go test -v ./...
+      - uses: docker://golang:1
+      - uses: actions/checkout@v1
+      - name: go test
+        run: cd signal && go test -v ./...
