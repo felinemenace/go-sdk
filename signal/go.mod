@@ -1,4 +1,4 @@
-module github.com/sqreen/go-standalone-sdk/signal
+module github.com/sqreen/go-sdk/signal
 
 go 1.12
 
