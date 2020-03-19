@@ -12,7 +12,7 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/sqreen/go-standalone-sdk/signal/client"
+	"github.com/sqreen/go-sdk/signal/client"
 	"github.com/stretchr/testify/require"
 )
 
