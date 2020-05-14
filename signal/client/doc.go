@@ -2,5 +2,5 @@
 // Please refer to our terms for more information:
 // https://www.sqreen.io/terms.html
 
-// This package is the bare HTTP client for security signals.
+// Package client provides the HTTP client to send security signals.
 package client
