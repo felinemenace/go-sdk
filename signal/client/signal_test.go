@@ -13,6 +13,7 @@ import (
 	"testing"
 
 	"github.com/sqreen/go-sdk/signal/client"
+	"github.com/sqreen/go-sdk/signal/client/api"
 	"github.com/stretchr/testify/require"
 )
 
@@ -20,13 +21,13 @@ func TestSignalService(t *testing.T) {
 	t.Run("SendSignal", func(t *testing.T) {
 		mux := http.NewServeMux()
 		tsrv := httptest.NewServer(mux)
-		c := client.NewClient(tsrv.Client())
+		c := client.NewClient(tsrv.Client(), "")
 		baseURL, err := url.Parse(tsrv.URL)
 		require.NoError(t, err)
 		c.BaseURL = baseURL
 
-		signal := &client.Signal{
-			SignalPayload: client.SignalPayload{
+		signal := &api.Signal{
+			SignalPayload: &api.SignalPayload{
 				Schema:  "my schema",
 				Payload: "hello signal",
 			},
@@ -38,7 +39,7 @@ func TestSignalService(t *testing.T) {
 		mux.HandleFunc("/", func(_ http.ResponseWriter, r *http.Request) {
 			require.Equal(t, "POST", r.Method)
 			require.Equal(t, "/signals", r.RequestURI)
-			var sent *client.Signal
+			var sent *api.Signal
 			err := json.NewDecoder(r.Body).Decode(&sent)
 			require.NoError(t, err)
 			require.Equal(t, signal, sent)
@@ -62,15 +63,15 @@ func TestSignalService(t *testing.T) {
 	t.Run("SendTrace", func(t *testing.T) {
 		mux := http.NewServeMux()
 		tsrv := httptest.NewServer(mux)
-		c := client.NewClient(tsrv.Client())
+		c := client.NewClient(tsrv.Client(), "")
 		baseURL, err := url.Parse(tsrv.URL)
 		require.NoError(t, err)
 		c.BaseURL = baseURL
 
-		trace := &client.Trace{
-			Data: []client.Signal{
+		trace := &api.Trace{
+			Data: []*api.Signal{
 				{
-					SignalPayload: client.SignalPayload{
+					SignalPayload: &api.SignalPayload{
 						Schema:  "my schema 1",
 						Payload: "hello signal 1",
 					},
@@ -79,7 +80,7 @@ func TestSignalService(t *testing.T) {
 					Source: "agent",
 				},
 				{
-					SignalPayload: client.SignalPayload{
+					SignalPayload: &api.SignalPayload{
 						Schema:  "my schema 2",
 						Payload: "hello signal 2",
 					},
@@ -93,7 +94,7 @@ func TestSignalService(t *testing.T) {
 		mux.HandleFunc("/", func(_ http.ResponseWriter, r *http.Request) {
 			require.Equal(t, "POST", r.Method)
 			require.Equal(t, "/traces", r.RequestURI)
-			var sent *client.Trace
+			var sent *api.Trace
 			err := json.NewDecoder(r.Body).Decode(&sent)
 			require.NoError(t, err)
 			require.Equal(t, trace, sent)
@@ -110,8 +111,8 @@ func TestSignalService(t *testing.T) {
 		})
 
 		t.Run("with empty trace data", func(t *testing.T) {
-			err = c.SignalService().SendTrace(context.Background(), &client.Trace{
-				Data: []client.Signal{},
+			err = c.SignalService().SendTrace(context.Background(), &api.Trace{
+				Data: []*api.Signal{},
 			})
 			require.Error(t, err)
 		})
@@ -124,30 +125,30 @@ func TestSignalService(t *testing.T) {
 	t.Run("SendBatch", func(t *testing.T) {
 		mux := http.NewServeMux()
 		tsrv := httptest.NewServer(mux)
-		c := client.NewClient(tsrv.Client())
+		c := client.NewClient(tsrv.Client(), "")
 		baseURL, err := url.Parse(tsrv.URL)
 		require.NoError(t, err)
 		c.BaseURL = baseURL
 
-		trace := &client.Trace{
-			Signal: client.Signal{
+		trace := &api.Trace{
+			Signal: api.Signal{
 				Name: "my trace",
-				SignalPayload: client.SignalPayload{
+				SignalPayload: &api.SignalPayload{
 					Schema:  "my trace schema",
 					Payload: "hello trace",
 				},
 			},
-			Data: []client.Signal{
+			Data: []*api.Signal{
 				{
 					Name: "my signal 1",
-					SignalPayload: client.SignalPayload{
+					SignalPayload: &api.SignalPayload{
 						Schema:  "my signal schema 1",
 						Payload: "hello signal 1",
 					},
 				},
 				{
 					Name: "my signal 2",
-					SignalPayload: client.SignalPayload{
+					SignalPayload: &api.SignalPayload{
 						Schema:  "my signal schema 2",
 						Payload: "hello signal 2",
 					},
@@ -155,15 +156,15 @@ func TestSignalService(t *testing.T) {
 			},
 		}
 
-		signal := &client.Signal{
+		signal := &api.Signal{
 			Name: "my signal 3",
-			SignalPayload: client.SignalPayload{
+			SignalPayload: &api.SignalPayload{
 				Schema:  "my signal schema 3",
 				Payload: "hello signal 3",
 			},
 		}
 
-		batch := client.Batch{
+		batch := api.Batch{
 			signal,
 			trace,
 		}
@@ -177,12 +178,12 @@ func TestSignalService(t *testing.T) {
 			require.NoError(t, err)
 			require.Len(t, recvBatch, len(batch))
 
-			var recvSignal *client.Signal
+			var recvSignal *api.Signal
 			err = json.Unmarshal(recvBatch[0], &recvSignal)
 			require.NoError(t, err)
 			require.Equal(t, signal, recvSignal)
 
-			var recvTrace *client.Trace
+			var recvTrace *api.Trace
 			err = json.Unmarshal(recvBatch[1], &recvTrace)
 			require.NoError(t, err)
 			require.Equal(t, trace, recvTrace)
@@ -199,7 +200,7 @@ func TestSignalService(t *testing.T) {
 		})
 
 		t.Run("with empty batch", func(t *testing.T) {
-			err = c.SignalService().SendBatch(context.Background(), client.Batch{})
+			err = c.SignalService().SendBatch(context.Background(), api.Batch{})
 			require.Error(t, err)
 		})
 

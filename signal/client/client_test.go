@@ -63,19 +63,19 @@ func TestResponseErrorChecking(t *testing.T) {
 func TestClient(t *testing.T) {
 	t.Run("NewClient", func(t *testing.T) {
 		t.Run("default http client", func(t *testing.T) {
-			require.NotNil(t, NewClient(nil))
+			require.NotNil(t, NewClient(nil, ""))
 		})
 
 		t.Run("specific http client", func(t *testing.T) {
 			client := &http.Client{
 				Timeout: 10 * time.Second,
 			}
-			require.NotNil(t, NewClient(client))
+			require.NotNil(t, NewClient(client, ""))
 		})
 	})
 
 	t.Run("newRequest", func(t *testing.T) {
-		c := NewClient(nil)
+		c := NewClient(nil, "")
 
 		for _, tc := range []struct {
 			name         string
@@ -228,7 +228,7 @@ func TestClient(t *testing.T) {
 				baseURL, err := url.Parse(srv.URL)
 				require.NoError(t, err)
 
-				c := NewClient(srv.Client())
+				c := NewClient(srv.Client(), "")
 				c.BaseURL = baseURL
 
 				req, err := c.newRequest("GET", "endpoint", tc.reqBody)
@@ -255,7 +255,7 @@ func TestClient(t *testing.T) {
 		baseURL, err := url.Parse(srv.URL)
 		require.NoError(t, err)
 
-		c := NewClient(srv.Client())
+		c := NewClient(srv.Client(), "")
 		c.BaseURL = baseURL
 
 		req, err := c.newRequest("PUT", "endpoint", nil)
@@ -275,7 +275,7 @@ func TestClient(t *testing.T) {
 		baseURL, err := url.Parse(srv.URL)
 		require.NoError(t, err)
 
-		c := NewClient(srv.Client())
+		c := NewClient(srv.Client(), "")
 		c.BaseURL = baseURL
 
 		req, err := c.newRequest("PUT", "endpoint", nil)

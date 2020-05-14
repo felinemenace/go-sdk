@@ -13,6 +13,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"net/http/httputil"
 	"net/url"
 )
 
@@ -21,11 +22,17 @@ const (
 )
 
 type Client struct {
-	client  *http.Client
 	BaseURL *url.URL
+	Logger  DebugLogger
+	client  *http.Client
+	token   string
 }
 
-func NewClient(client *http.Client) *Client {
+type DebugLogger interface {
+	Debugf(format string, v ...interface{})
+}
+
+func NewClient(client *http.Client, token string) *Client {
 	if client == nil {
 		client = &http.Client{}
 	}
@@ -33,6 +40,7 @@ func NewClient(client *http.Client) *Client {
 	return &Client{
 		client:  client,
 		BaseURL: baseURL,
+		token:   token,
 	}
 }
 
@@ -72,7 +80,11 @@ func (c *Client) do(ctx context.Context, req *http.Request, respBody interface{}
 	if ctx == nil {
 		return errors.New("context must be non-nil")
 	}
+
 	req = req.WithContext(ctx)
+	req.Header.Set("X-Session-Key", c.token)
+
+	c.debugf("sending request\n%s\n", (*httpRequestStringer)(req))
 
 	resp, err := c.client.Do(req)
 	if err != nil {
@@ -84,6 +96,8 @@ func (c *Client) do(ctx context.Context, req *http.Request, respBody interface{}
 		_, _ = io.Copy(ioutil.Discard, resp.Body)
 		_ = resp.Body.Close()
 	}()
+
+	c.debugf("received response\n%s\n", (*httpResponseStringer)(resp))
 
 	err = checkResponse(resp)
 	if err != nil {
@@ -98,6 +112,28 @@ func (c *Client) do(ctx context.Context, req *http.Request, respBody interface{}
 	}
 
 	return nil
+}
+
+func (c *Client) debugf(fmt string, args ...interface{}) {
+	if c.Logger == nil {
+		return
+	}
+	c.Logger.Debugf(fmt, args...)
+}
+
+type (
+	httpRequestStringer  http.Request
+	httpResponseStringer http.Response
+)
+
+func (r *httpRequestStringer) String() string {
+	dump, _ := httputil.DumpRequestOut((*http.Request)(r), true)
+	return string(dump)
+}
+
+func (r *httpResponseStringer) String() string {
+	dump, _ := httputil.DumpResponse((*http.Response)(r), true)
+	return string(dump)
 }
 
 // Client error types.

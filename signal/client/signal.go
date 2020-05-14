@@ -7,13 +7,15 @@ package client
 import (
 	"context"
 	"errors"
+
+	"github.com/sqreen/go-sdk/signal/client/api"
 )
 
 type SignalService Client
 
 func (s *SignalService) unwrap() *Client { return (*Client)(s) }
 
-func (s *SignalService) SendBatch(ctx context.Context, b Batch) error {
+func (s *SignalService) SendBatch(ctx context.Context, b api.Batch) error {
 	if len(b) == 0 {
 		return errors.New("unexpected empty batch")
 	}
@@ -25,7 +27,7 @@ func (s *SignalService) SendBatch(ctx context.Context, b Batch) error {
 	return c.do(ctx, r, nil)
 }
 
-func (s *SignalService) SendTrace(ctx context.Context, trace *Trace) error {
+func (s *SignalService) SendTrace(ctx context.Context, trace *api.Trace) error {
 	if trace == nil {
 		return errors.New("unexpected trace argument value `nil`")
 	}
@@ -40,7 +42,7 @@ func (s *SignalService) SendTrace(ctx context.Context, trace *Trace) error {
 	return c.do(ctx, r, nil)
 }
 
-func (s *SignalService) SendSignal(ctx context.Context, signal *Signal) error {
+func (s *SignalService) SendSignal(ctx context.Context, signal *api.Signal) error {
 	if signal == nil {
 		return errors.New("unexpected signal argument value `nil`")
 	}
