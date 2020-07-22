@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	defaultBaseURL = "https://ingestion.sqreen.com/"
+	DefaultBaseURL = "https://ingestion.sqreen.com/"
 )
 
 type Client struct {
@@ -36,7 +36,7 @@ func NewClient(client *http.Client, token string) *Client {
 	if client == nil {
 		client = &http.Client{}
 	}
-	baseURL, _ := url.Parse(defaultBaseURL)
+	baseURL, _ := url.Parse(DefaultBaseURL)
 	return &Client{
 		client:  client,
 		BaseURL: baseURL,
