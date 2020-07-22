@@ -154,7 +154,7 @@ func TestClient(t *testing.T) {
 
 				require.NoError(t, err)
 				require.Equal(t, tc.method, req.Method)
-				require.Equal(t, defaultBaseURL+tc.endpoint, req.URL.String())
+				require.Equal(t, DefaultBaseURL+tc.endpoint, req.URL.String())
 				if tc.expectedBody != "" {
 					body, err := ioutil.ReadAll(req.Body)
 					require.NoError(t, err)
