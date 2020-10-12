@@ -28,6 +28,8 @@ type (
 	}
 
 	RequestContext struct {
+		Start      time.Time   `json:"start_processing_time"`
+		End        time.Time   `json:"end_processing_time"`
 		Headers    [][]string  `json:"headers"`
 		UserAgent  string      `json:"user_agent"`
 		Scheme     string      `json:"scheme"`
@@ -72,8 +74,10 @@ func NewContext(req *RequestContext, resp *ResponseContext) *Context {
 	}
 }
 
-func NewRequestContext(requestID string, headers [][]string, userAgent, scheme, verb, host, remoteIP, path, referer string, port, remotePort uint64, parameters interface{}) *RequestContext {
+func NewRequestContext(start, end time.Time, requestID string, headers [][]string, userAgent, scheme, verb, host, remoteIP, path, referer string, port, remotePort uint64, parameters interface{}) *RequestContext {
 	return &RequestContext{
+		Start:      start,
+		End:        end,
 		Rid:        requestID,
 		Headers:    headers,
 		UserAgent:  userAgent,
